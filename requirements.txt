@@ -1,0 +1,7 @@
+alpaca==1.0.0
+alpaca_trade_api==3.2.0
+lumibot==3.8.1
+python-dotenv==1.0.1
+timedelta==2020.12.3
+torch==2.5.0
+transformers==4.46.0
