@@ -8,21 +8,28 @@ from alpaca.trading import GetAssetsRequest
 from credentials import load_api_credentials
 from alpaca_trade_api import REST
 
-def run(broker: any, parameters: dict):
+
+def run(broker: Broker, parameters: dict):
     from lumibot.traders import Trader
-    strategy = SentimentStrategy(name="sentiment_strategy", broker=broker, parameters=parameters)
+
+    strategy = SentimentStrategy(
+        name="sentiment_strategy", broker=broker, parameters=parameters
+    )
     trader = Trader()
     trader.add_strategy(strategy)
     trader.run_all()
 
+
 def backtest(
-    broker: any,
+    broker: Broker,
     start_date: datetime,
     end_date: datetime,
     parameters: dict,
     trading_fees: dict,
 ):
-    strategy = SentimentStrategy(name="sentiment_strategy", broker=broker, parameters=parameters)
+    strategy = SentimentStrategy(
+        name="sentiment_strategy", broker=broker, parameters=parameters
+    )
     strategy.backtest(
         YahooDataBacktesting,
         start_date,
@@ -32,9 +39,13 @@ def backtest(
         sell_trading_fees=trading_fees.get("sell_trading_fees", []),
     )
 
+
 def list_assets(broker: Broker, asset_class: str):
-    for asset in broker.api.get_all_assets(filter=GetAssetsRequest(asset_class=asset_class)):
+    for asset in broker.api.get_all_assets(
+        filter=GetAssetsRequest(asset_class=asset_class)
+    ):
         print(f"{asset.symbol} - {asset.name} - {asset.exchange} - {asset.asset_class}")
+
 
 if __name__ == "__main__":
     API_KEY, API_SECRET, PAPER, BASE_URL = load_api_credentials()
@@ -50,8 +61,8 @@ if __name__ == "__main__":
                 "symbol": args.symbol,
                 "cash_at_risk": args.cash_at_risk,
                 "sleeptime": args.sleeptime,
-                "days_prior": args.days_prior
-            }
+                "days_prior": args.days_prior,
+            },
         )
     elif args.mode == "backtest":
         backtest(
@@ -62,7 +73,7 @@ if __name__ == "__main__":
                 "cash_at_risk": args.cash_at_risk,
                 "sleeptime": args.sleeptime,
                 "days_prior": args.days_prior,
-                'api': REST(base_url=BASE_URL, key_id=API_KEY, secret_key=API_SECRET)
+                "api": REST(base_url=BASE_URL, key_id=API_KEY, secret_key=API_SECRET),
             },
             start_date=args.start_date,
             end_date=args.end_date,
