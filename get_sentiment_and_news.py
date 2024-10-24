@@ -71,7 +71,7 @@ class GetSentimentAndNewsCached(GetSentimentAndNews):
         return news_headlines, probability, sentiment, num_headlines
 
     def _get_cache_file_path(self, to_date, from_date):
-        return f"./news/{self.symbol}/headlines_sentiment_{self.symbol}_{from_date}_{to_date}.txt"
+        return f"./cache/news/{self.symbol}/headlines_sentiment_{self.symbol}_{from_date}_{to_date}.txt"
 
     def _read_cached_news_and_sentiment(self, cache_file):
         with open(cache_file, "r") as f:
