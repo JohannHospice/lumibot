@@ -26,6 +26,7 @@ class SentimentStrategy(Strategy):
         sleeptime: str,
         api: REST,
         days_prior: int = 3,
+        news_limit: int = 10,
     ):
         self.symbol = symbol
         self.sleeptime = sleeptime
@@ -35,7 +36,7 @@ class SentimentStrategy(Strategy):
         self.number_of_news = 0
         self.number_of_news_calls = 0
         self.get_sentiment_and_news_cached = GetSentimentAndNewsCached(
-            symbol, api.get_news
+            symbol, news_limit, api.get_news
         )
 
     def on_trading_iteration(self):

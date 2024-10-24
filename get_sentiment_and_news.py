@@ -1,8 +1,9 @@
 from typing import Tuple, List
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from alpaca_trade_api import REST
 import torch
 import os
-from typing import Callable
+import gc
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
@@ -14,9 +15,10 @@ labels = ["positive", "negative", "neutral"]
 
 
 class GetSentimentAndNews:
-    def __init__(self, symbol: str, get_news: Callable[[str, str, str], str]):
+    def __init__(self, symbol: str, limit: int, get_news: REST.get_news):
         self.symbol = symbol
         self.get_news = get_news
+        self.limit = limit
 
     def get_news_and_sentiment(
         self, dates: Tuple[str, str]
@@ -29,7 +31,9 @@ class GetSentimentAndNews:
 
     def _fetch_news_headlines(self, dates: Tuple[str, str]) -> List[str]:
         to_date, from_date = dates
-        news = self.get_news(symbol=self.symbol, start=from_date, end=to_date)
+        news = self.get_news(
+            symbol=self.symbol, start=from_date, end=to_date, limit=self.limit
+        )
         return [ev.__dict__["_raw"]["headline"] for ev in news]
 
     def _estimate_sentiment(self, news: List[str]) -> Tuple[float, str]:
@@ -48,8 +52,8 @@ class GetSentimentAndNews:
 
 
 class GetSentimentAndNewsCached(GetSentimentAndNews):
-    def __init__(self, symbol: str, get_news: Callable[[str, str, str], str]):
-        super().__init__(symbol, get_news)
+    def __init__(self, symbol: str, limit: int, get_news: REST.get_news):
+        super().__init__(symbol, limit, get_news)
 
     def get_news_and_sentiment(
         self, dates: Tuple[str, str]
@@ -68,10 +72,12 @@ class GetSentimentAndNewsCached(GetSentimentAndNews):
             cache_file, probability, sentiment, news_headlines
         )
 
+        gc.collect()
+
         return news_headlines, probability, sentiment, num_headlines
 
     def _get_cache_file_path(self, to_date, from_date):
-        return f"./cache/news/{self.symbol}/headlines_sentiment_{self.symbol}_{from_date}_{to_date}.txt"
+        return f"./cache/news/{self.symbol}/sentiment_{self.symbol}_{from_date}-{to_date}_{self.limit}.txt"
 
     def _read_cached_news_and_sentiment(self, cache_file):
         with open(cache_file, "r") as f:
@@ -85,8 +91,11 @@ class GetSentimentAndNewsCached(GetSentimentAndNews):
         self, cache_file, probability, sentiment, news_headlines
     ):
         os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+
         with open(cache_file, "w") as f:
             f.write(f"{probability}\n")
             f.write(f"{sentiment}\n")
             for headline in news_headlines:
                 f.write(headline + "\n")
+
+        gc.collect()

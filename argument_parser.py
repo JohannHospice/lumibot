@@ -30,6 +30,13 @@ def parse_arguments():
         default=3,
         help="Number of days prior for news analysis (default: 3)",
     )
+    run_parser.add_argument(
+        "-nl",
+        "--news_limit",
+        type=int,
+        default=10,
+        help="Limit of news fetched for the strategy (default: 10)",
+    )
 
     list_parser = subparsers.add_parser("list", help="List available assets")
     list_parser.add_argument(
@@ -86,6 +93,13 @@ def parse_arguments():
         type=str,
         choices=list(BROKER_FEES.keys()),
         help="Choose the broker fees model",
+    )
+    backtest_parser.add_argument(
+        "-nl",
+        "--news_limit",
+        type=int,
+        default=10,
+        help="Limit of news fetched for the strategy (default: 10)",
     )
 
     return parser, parser.parse_args()
