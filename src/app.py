@@ -1,5 +1,5 @@
 from argument_parser import parse_arguments
-from credentials import load_api_credentials
+from utils.credentials import load_api_credentials
 from commands import backtest_strategy, list_assets, run_strategy
 
 COMMANDS = {

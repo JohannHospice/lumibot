@@ -1,7 +1,12 @@
 from lumibot.traders import Trader
 from lumibot.backtesting import YahooDataBacktesting
 from alpaca.trading import GetAssetsRequest
-from utils import build_parameters, create_broker, create_strategy, create_trading_fees
+from utils.utils import (
+    build_parameters,
+    create_broker,
+    create_strategy,
+    create_trading_fees,
+)
 
 
 def run_strategy(args: dict, credentials: dict):

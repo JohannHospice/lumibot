@@ -1,8 +1,8 @@
-from typing import Tuple, List
+from typing import Tuple
 from alpaca_trade_api import REST
 from lumibot.strategies.strategy import Strategy
 from timedelta import Timedelta
-from get_sentiment_and_news import GetSentimentAndNewsCached
+from sentiment.get_sentiment_and_news_cached import GetSentimentAndNewsCached
 import numpy as np
 
 
