@@ -4,7 +4,7 @@ from constants import BROKER_FEES
 
 
 def add_common_arguments(
-    parser,
+    parser: argparse.ArgumentParser,
     cash_default=0.5,
     sleeptime_default="24H",
     days_prior_default=3,
@@ -148,7 +148,8 @@ def parse_arguments():
         "--fees",
         type=str,
         choices=list(BROKER_FEES.keys()),
-        help="Choose the broker fees model",
+        default="Alpaca",
+        help="Choose the broker fees model (default: Alpaca)",
     )
 
     return parser, parser.parse_args()

@@ -2,6 +2,11 @@ from lumibot.entities import TradingFee
 from sentiment_strategy import SentimentStrategy
 from momentum_strategy import MomentumStrategy
 
+STRATEGIES = {
+    "sentiment": SentimentStrategy,
+    "momentum": MomentumStrategy,
+}
+
 BROKER_FEES = {
     "Interactive Brokers": {
         "buy_trading_fees": [
@@ -47,9 +52,4 @@ BROKER_FEES = {
             TradingFee(percent_fee=0.26),  # 0,26 % pour les "takers"
         ],
     },
-}
-
-STRATEGIES = {
-    "sentiment": SentimentStrategy,
-    "momentum": MomentumStrategy,
 }
