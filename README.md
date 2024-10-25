@@ -71,3 +71,7 @@ To list all available assets of a given class from the broker, use the following
 ./app list -c <asset_class>
 ```
 - <asset_class>: The class of assets to list (e.g., us_equity, crypto).
+
+## Credits
+
+This work is inspired from [MLTradingBot](https://github.com/nicknochnack/MLTradingBot)
