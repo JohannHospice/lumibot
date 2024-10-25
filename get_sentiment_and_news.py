@@ -12,6 +12,7 @@ model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert").t
     device
 )
 labels = ["positive", "negative", "neutral"]
+NO_CACHE = False
 
 
 class GetSentimentAndNews:
@@ -61,7 +62,7 @@ class GetSentimentAndNewsCached(GetSentimentAndNews):
         to_date, from_date = dates
         cache_file = self._get_cache_file_path(to_date, from_date)
 
-        if os.path.exists(cache_file):
+        if not NO_CACHE and os.path.exists(cache_file):
             return self._read_cached_news_and_sentiment(cache_file)
 
         news_headlines, probability, sentiment, num_headlines = (

@@ -1,7 +1,6 @@
 from argument_parser import parse_arguments
 from datetime import datetime
-from constants import BROKER_FEES
-from sentiment_strategy import SentimentStrategy
+from constants import BROKER_FEES, STRATEGIES
 from lumibot.brokers import Broker, Alpaca
 from lumibot.strategies.strategy import Strategy
 from lumibot.traders import Trader
@@ -9,7 +8,12 @@ from lumibot.backtesting import YahooDataBacktesting
 from alpaca.trading import GetAssetsRequest
 from credentials import load_api_credentials
 from alpaca_trade_api import REST
-from get_sentiment_and_news import GetSentimentAndNewsCached
+
+
+def create_strategy(strategy: str, broker: Broker, parameters: dict) -> Strategy:
+    if strategy not in STRATEGIES:
+        raise ValueError(f"Unknown strategy: {strategy}")
+    return STRATEGIES.get(strategy)(name=strategy, broker=broker, parameters=parameters)
 
 
 def run(strategy: Strategy):
@@ -52,31 +56,27 @@ if __name__ == "__main__":
     if args.mode == "list":
         list_assets(broker, args.asset_class)
 
-    get_sentiment_and_news_cached = GetSentimentAndNewsCached(
-        args.symbol,
-        args.news_limit,
-        REST(base_url=BASE_URL, key_id=API_KEY, secret_key=API_SECRET).get_news,
-    )
     parameters = {
+        "get_news": REST(
+            base_url=BASE_URL, key_id=API_KEY, secret_key=API_SECRET
+        ).get_news,
         "symbol": args.symbol,
-        "cash_at_risk": args.cash_at_risk,
         "sleeptime": args.sleeptime,
         "days_prior_for_news": args.days_prior,
         "news_limit": args.news_limit,
-        "get_sentiment_and_news_cached": get_sentiment_and_news_cached,
-        "positive_sentiment_threshold": 0.999,
-        "negative_sentiment_threshold": 0.999,
-        "buy_take_profit_multiplier": 1.20,
-        "buy_stop_loss_multiplier": 0.95,
-        "sell_take_profit_multiplier": 0.8,
-        "sell_stop_loss_multiplier": 1.05,
-        "volatility_threshold": 0.03,
-        "volatility_period": 14,
+        "cash_at_risk": args.cash_at_risk,
+        "sentiment_threshold": args.sentiment_threshold,
+        "buy_take_profit_multiplier": 1 + args.take_profit_threshold,
+        "buy_stop_loss_multiplier": 1 - args.stop_loss_threshold,
+        "sell_take_profit_multiplier": 1 - args.take_profit_threshold,
+        "sell_stop_loss_multiplier": 1 + args.stop_loss_threshold,
+        "volatility_threshold": args.volatility_threshold,
+        "volatility_period": args.volatility_period,
     }
-    strategy = SentimentStrategy(
-        name="sentiment_strategy",
-        broker=broker,
-        parameters=parameters,
+    strategy = create_strategy(
+        args.strategy,
+        broker,
+        parameters,
     )
 
     if args.mode == "run":

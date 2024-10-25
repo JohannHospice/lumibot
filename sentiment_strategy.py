@@ -14,18 +14,19 @@ class SentimentStrategy(Strategy):
     def initialize(
         self,
         symbol: str,
-        get_sentiment_and_news_cached: GetSentimentAndNewsCached,
+        get_news: REST.get_news,
         cash_at_risk: float = 0.5,
         sleeptime: str = "24H",
         days_prior_for_news: int = 3,
-        positive_sentiment_threshold: float = 0.999,
-        negative_sentiment_threshold: float = 0.999,
+        news_limit: int = 10,
+        sentiment_threshold: float = 0.999,
         buy_take_profit_multiplier: float = 1.10,
         buy_stop_loss_multiplier: float = 0.97,
         sell_take_profit_multiplier: float = 0.9,
         sell_stop_loss_multiplier: float = 1.03,
         volatility_threshold: float = 0.03,
         volatility_period: int = 14,
+        volatility_factor: float = 0.1,  # Ajout d'un facteur de volatilité
     ):
         self.last_trade = None
         self.number_of_news = 0
@@ -35,16 +36,33 @@ class SentimentStrategy(Strategy):
         self.sleeptime = sleeptime
         self.cash_at_risk = cash_at_risk
         self.days_prior_for_news = days_prior_for_news
-        self.get_sentiment_and_news_cached = get_sentiment_and_news_cached
+        self.get_sentiment_and_news_cached = GetSentimentAndNewsCached(
+            self.symbol,
+            news_limit,
+            get_news,
+        )
 
-        self.positive_sentiment_threshold = positive_sentiment_threshold
-        self.negative_sentiment_threshold = negative_sentiment_threshold
+        self.sentiment_threshold = sentiment_threshold
         self.buy_take_profit_multiplier = buy_take_profit_multiplier
         self.buy_stop_loss_multiplier = buy_stop_loss_multiplier
         self.sell_take_profit_multiplier = sell_take_profit_multiplier
         self.sell_stop_loss_multiplier = sell_stop_loss_multiplier
         self.volatility_threshold = volatility_threshold
         self.volatility_period = volatility_period
+        self.volatility_factor = volatility_factor  # Ajout d'un facteur de volatilité
+
+        print(f"Symbol: {self.symbol}")
+        print(f"Sleep time: {self.sleeptime}")
+        print(f"Cash at risk: {self.cash_at_risk}")
+        print(f"Days prior for news: {self.days_prior_for_news}")
+        print(f"Sentiment threshold: {self.sentiment_threshold}")
+        print(f"Buy take profit multiplier: {self.buy_take_profit_multiplier}")
+        print(f"Buy stop loss multiplier: {self.buy_stop_loss_multiplier}")
+        print(f"Sell take profit multiplier: {self.sell_take_profit_multiplier}")
+        print(f"Sell stop loss multiplier: {self.sell_stop_loss_multiplier}")
+        print(f"Volatility threshold: {self.volatility_threshold}")
+        print(f"Volatility period: {self.volatility_period}")
+        print(f"News limit: {news_limit}")
 
     def on_trading_iteration(self):
         cash, last_price, quantity, volatility = self._position_sizing()
@@ -57,9 +75,9 @@ class SentimentStrategy(Strategy):
             return
 
         if self._should_buy(sentiment, probability):
-            self._execute_buy_order(quantity, last_price)
+            self._execute_buy_order(quantity, last_price, volatility)
         elif self._should_sell(sentiment, probability):
-            self._execute_sell_order(quantity, last_price)
+            self._execute_sell_order(quantity, last_price, volatility)
 
     def on_strategy_end(self):
         print(
@@ -104,44 +122,54 @@ class SentimentStrategy(Strategy):
 
     def _should_buy(self, sentiment: str, probability: float) -> bool:
         """Determine if a buy order should be placed."""
-        return (
-            sentiment == "positive" and probability > self.positive_sentiment_threshold
-        )
+        return sentiment == "positive" and probability > self.sentiment_threshold
 
     def _should_sell(self, sentiment: str, probability: float) -> bool:
         """Determine if a sell order should be placed."""
-        return (
-            sentiment == "negative" and probability > self.negative_sentiment_threshold
-        )
+        return sentiment == "negative" and probability > self.sentiment_threshold
 
-    def _execute_buy_order(self, quantity: int, last_price: float):
-        """Execute a buy order with volatility-adjusted risk management."""
+    def _execute_buy_order(self, quantity: int, last_price: float, volatility: float):
+        """Execute a buy order with dynamic take-profit and stop-loss based on volatility."""
         if self.last_trade == "sell":
             self.sell_all()
+
+        take_profit_price = last_price * (
+            self.buy_take_profit_multiplier + (volatility * self.volatility_factor)
+        )
+        stop_loss_price = last_price * (
+            self.buy_stop_loss_multiplier - (volatility * self.volatility_factor)
+        )
 
         order = self.create_order(
             self.symbol,
             quantity,
             "buy",
             type="bracket",
-            take_profit_price=last_price * self.buy_take_profit_multiplier,
-            stop_loss_price=last_price * self.buy_stop_loss_multiplier,
+            take_profit_price=take_profit_price,
+            stop_loss_price=stop_loss_price,
         )
         self.submit_order(order)
         self.last_trade = "buy"
 
-    def _execute_sell_order(self, quantity: int, last_price: float):
-        """Execute a sell order with volatility-adjusted risk management."""
+    def _execute_sell_order(self, quantity: int, last_price: float, volatility: float):
+        """Execute a sell order with dynamic take-profit and stop-loss based on volatility."""
         if self.last_trade == "buy":
             self.sell_all()
+
+        take_profit_price = last_price * (
+            self.sell_take_profit_multiplier - (volatility * self.volatility_factor)
+        )
+        stop_loss_price = last_price * (
+            self.sell_stop_loss_multiplier + (volatility * self.volatility_factor)
+        )
 
         order = self.create_order(
             self.symbol,
             quantity,
             "sell",
             type="bracket",
-            take_profit_price=last_price * self.sell_take_profit_multiplier,
-            stop_loss_price=last_price * self.sell_stop_loss_multiplier,
+            take_profit_price=take_profit_price,
+            stop_loss_price=stop_loss_price,
         )
         self.submit_order(order)
         self.last_trade = "sell"
