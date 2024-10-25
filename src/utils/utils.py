@@ -1,6 +1,6 @@
 from alpaca_trade_api import REST
 from strategies.strategies import STRATEGIES
-from broker_fees import BROKER_FEES
+from utils.broker_fees import BROKER_FEES
 from lumibot.brokers import Alpaca, Broker
 from lumibot.strategies.strategy import Strategy
 

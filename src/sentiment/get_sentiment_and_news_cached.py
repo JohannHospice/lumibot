@@ -1,4 +1,4 @@
-from get_sentiment_and_news import GetSentimentAndNews
+from sentiment.get_sentiment_and_news import GetSentimentAndNews
 from alpaca_trade_api import REST
 import gc
 import os

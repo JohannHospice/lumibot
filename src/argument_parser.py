@@ -1,6 +1,6 @@
 import argparse
 from datetime import datetime, timezone, time
-from broker_fees import BROKER_FEES
+from utils.broker_fees import BROKER_FEES
 from strategies.strategies import STRATEGIES
 
 

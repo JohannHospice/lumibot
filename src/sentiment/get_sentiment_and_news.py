@@ -1,4 +1,4 @@
-from estimate_sentiment import estimate_sentiment
+from sentiment.estimate_sentiment import estimate_sentiment
 from alpaca_trade_api import REST
 from typing import List, Tuple
 
