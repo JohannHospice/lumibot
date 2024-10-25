@@ -1,18 +1,4 @@
 from lumibot.entities import TradingFee
-from sentiment_strategy import SentimentStrategy
-from momentum_strategy import MomentumStrategy
-from commands import backtest_strategy, list_assets, run_strategy
-
-COMMANDS = {
-    "list": list_assets,
-    "run": run_strategy,
-    "backtest": backtest_strategy,
-}
-
-STRATEGIES = {
-    "sentiment": SentimentStrategy,
-    "momentum": MomentumStrategy,
-}
 
 BROKER_FEES = {
     "Interactive Brokers": {

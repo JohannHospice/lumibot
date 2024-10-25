@@ -13,4 +13,9 @@ def load_api_credentials():
     if not API_KEY or not API_SECRET:
         raise ValueError("API_KEY and API_SECRET must be set in the .env file")
 
-    return {API_KEY, API_SECRET, PAPER, BASE_URL}
+    return {
+        "API_KEY": API_KEY,
+        "API_SECRET": API_SECRET,
+        "PAPER": PAPER,
+        "BASE_URL": BASE_URL,
+    }

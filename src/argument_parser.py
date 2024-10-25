@@ -1,6 +1,7 @@
 import argparse
 from datetime import datetime, timezone, time
-from constants import BROKER_FEES, STRATEGIES
+from broker_fees import BROKER_FEES
+from strategies.strategies import STRATEGIES
 
 
 def add_common_arguments(

@@ -4,7 +4,7 @@ from alpaca.trading import GetAssetsRequest
 from utils import build_parameters, create_broker, create_strategy, create_trading_fees
 
 
-def run_strategy(args: dict, credentials: set):
+def run_strategy(args: dict, credentials: dict):
     """Runs the given strategy using a Trader instance."""
     broker = create_broker(credentials)
     parameters = build_parameters(args, credentials)
@@ -15,7 +15,7 @@ def run_strategy(args: dict, credentials: set):
     trader.run_all()
 
 
-def backtest_strategy(args: dict, credentials: set):
+def backtest_strategy(args: dict, credentials: dict):
     """Backtests the given strategy over a specified date range."""
     broker = create_broker(credentials)
     parameters = build_parameters(args, credentials)
@@ -24,19 +24,17 @@ def backtest_strategy(args: dict, credentials: set):
 
     strategy.backtest(
         YahooDataBacktesting,
-        start_date=args.start_date,
-        end_date=args.end_date,
+        backtesting_start=args.start_date,
+        backtesting_end=args.end_date,
         parameters=parameters,
         buy_trading_fees=trading_fees.get("buy_trading_fees", []),
         sell_trading_fees=trading_fees.get("sell_trading_fees", []),
     )
 
 
-def list_assets(args: dict, credentials: set):
+def list_assets(args: dict, credentials: dict):
     """Lists all assets of a given class from the broker."""
-    broker = create_broker(
-        credentials.API_KEY, credentials.API_SECRET, credentials.PAPER
-    )
+    broker = create_broker(credentials)
     for asset in broker.api.get_all_assets(
         filter=GetAssetsRequest(asset_class=args.asset_class)
     ):

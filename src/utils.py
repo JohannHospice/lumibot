@@ -1,17 +1,17 @@
 from alpaca_trade_api import REST
-
-from constants import STRATEGIES, BROKER_FEES
+from strategies.strategies import STRATEGIES
+from broker_fees import BROKER_FEES
 from lumibot.brokers import Alpaca, Broker
 from lumibot.strategies.strategy import Strategy
 
 
-def build_parameters(args: dict, credentials: set) -> dict:
+def build_parameters(args: dict, credentials: dict) -> dict:
     """Builds the parameters dictionary for the strategy."""
     return {
         "get_news": REST(
-            base_url=credentials.BASE_URL,
-            key_id=credentials.API_KEY,
-            secret_key=credentials.API_SECRET,
+            base_url=credentials["BASE_URL"],
+            key_id=credentials["API_KEY"],
+            secret_key=credentials["API_SECRET"],
         ).get_news,
         "symbol": args.symbol,
         "sleeptime": args.sleeptime,
@@ -28,13 +28,13 @@ def build_parameters(args: dict, credentials: set) -> dict:
     }
 
 
-def create_broker(credentials: set) -> Broker:
+def create_broker(credentials: dict) -> Broker:
     """Creates and returns an Alpaca broker instance."""
     return Alpaca(
         {
-            "API_KEY": credentials.API_KEY,
-            "API_SECRET": credentials.API_SECRET,
-            "PAPER": credentials.PAPER,
+            "API_KEY": credentials["API_KEY"],
+            "API_SECRET": credentials["API_SECRET"],
+            "PAPER": credentials["PAPER"],
         }
     )
 

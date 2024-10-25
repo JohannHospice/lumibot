@@ -1,6 +1,12 @@
 from argument_parser import parse_arguments
 from credentials import load_api_credentials
-from constants import COMMANDS
+from commands import backtest_strategy, list_assets, run_strategy
+
+COMMANDS = {
+    "list": list_assets,
+    "run": run_strategy,
+    "backtest": backtest_strategy,
+}
 
 
 def main():
