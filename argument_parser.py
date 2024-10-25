@@ -1,6 +1,6 @@
 import argparse
 from datetime import datetime, timezone, time
-from constants import BROKER_FEES
+from constants import BROKER_FEES, STRATEGIES
 
 
 def add_common_arguments(
@@ -9,7 +9,7 @@ def add_common_arguments(
     sleeptime_default="24H",
     days_prior_default=3,
     news_limit_default=10,
-    strategy_choices=["sentiment", "momentum"],
+    strategy_choices=None,
     strategy_default="sentiment",
     tp_default=0.3,
     sl_default=0.1,
@@ -23,85 +23,71 @@ def add_common_arguments(
         "--cash_at_risk",
         type=float,
         default=cash_default,
-        help="Fraction of cash to risk on each trade (default: {})".format(
-            cash_default
-        ),
+        help=f"Fraction of cash to risk on each trade (default: {cash_default})",
     )
     parser.add_argument(
         "-s",
         "--sleeptime",
         type=str,
         default=sleeptime_default,
-        help="Time to sleep between trading iterations (default: {})".format(
-            sleeptime_default
-        ),
+        help=f"Time to sleep between trading iterations (default: {sleeptime_default})",
     )
     parser.add_argument(
         "-d",
         "--days_prior",
         type=int,
         default=days_prior_default,
-        help="Number of days prior for news analysis (default: {})".format(
-            days_prior_default
-        ),
+        help=f"Number of days prior for news analysis (default: {days_prior_default})",
     )
     parser.add_argument(
         "-nl",
         "--news_limit",
         type=int,
         default=news_limit_default,
-        help="Limit of news fetched for the strategy (default: {})".format(
-            news_limit_default
-        ),
+        help=f"Limit of news fetched for the strategy (default: {news_limit_default})",
     )
     parser.add_argument(
         "-st",
         "--strategy",
         type=str,
-        choices=strategy_choices,
+        choices=(STRATEGIES.keys() if strategy_choices is None else strategy_choices),
         default=strategy_default,
-        help="Choose the strategy to run (default: {})".format(strategy_default),
+        help=f"Choose the strategy to run (default: {strategy_default})",
     )
     parser.add_argument(
         "-tp",
         "--take_profit_threshold",
         type=float,
         default=tp_default,
-        help="Take profit threshold (default: {})".format(tp_default),
+        help=f"Take profit threshold (default: {tp_default})",
     )
     parser.add_argument(
         "-sl",
         "--stop_loss_threshold",
         type=float,
         default=sl_default,
-        help="Stop loss threshold (default: {})".format(sl_default),
+        help=f"Stop loss threshold (default: {sl_default})",
     )
     parser.add_argument(
         "-sthr",
         "--sentiment_threshold",
         type=float,
         default=sentiment_thr_default,
-        help="Sentiment threshold for making trading decisions (default: {})".format(
-            sentiment_thr_default
-        ),
+        help=f"Sentiment threshold for making trading decisions (default: {sentiment_thr_default})",
     )
     parser.add_argument(
         "-vt",
         "--volatility_threshold",
         type=float,
         default=volatility_thr_default,
-        help="Volatility threshold for trading decisions (default: {})".format(
-            volatility_thr_default
-        ),
+        help=f"Volatility threshold for trading decisions (default: {volatility_thr_default})",
     )
     parser.add_argument(
         "-vp",
         "--volatility_period",
         type=int,
         default=volatility_period_default,
-        help="Period over which to calculate volatility (default: {} days)".format(
-            volatility_period_default
-        ),
+        help=f"Period over which to calculate volatility (default: {volatility_period_default} days)",
     )
 
 
