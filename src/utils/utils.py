@@ -4,6 +4,12 @@ from utils.broker_fees import BROKER_FEES
 from lumibot.brokers import Alpaca, Broker
 from lumibot.strategies.strategy import Strategy
 
+import pandas as pd
+from lumibot.backtesting import BacktestingBroker, PandasDataBacktesting
+from lumibot.entities import Asset, Data
+from lumibot.strategies import Strategy
+import yfinance as yf
+
 
 def build_parameters(args: dict, credentials: dict) -> dict:
     """Builds the parameters dictionary for the strategy."""
@@ -13,7 +19,7 @@ def build_parameters(args: dict, credentials: dict) -> dict:
             key_id=credentials["API_KEY"],
             secret_key=credentials["API_SECRET"],
         ).get_news,
-        "symbol": args.symbol,
+        "symbols": ["SPY", "QQQ", "DIA", "AAPL"],
         "sleeptime": args.sleeptime,
         "days_prior_for_news": args.days_prior,
         "news_limit": args.news_limit,
@@ -52,3 +58,32 @@ def create_trading_fees(args: dict):
     if args.fees not in BROKER_FEES:
         raise ValueError(f"Unknown fees: {args.fees}")
     return BROKER_FEES.get(args.fees, {})
+
+
+def get_symbol_data(symbol: str, period: str = "5d", interval: str = "1m"):
+    filename = f"cache/data/{symbol}_{period}_{interval}.csv"
+    try:
+        df = pd.read_csv(filename)
+    except Exception:
+        # Download minute data from 2018 to now forf {symbol}
+        data = yf.download(symbol, period=period, interval=interval)
+
+        print(filename)
+        # Save the data to a CSV file
+        data.to_csv(filename)
+        df = pd.read_csv(filename)
+
+    asset = Asset(
+        symbol=symbol,
+        asset_type=Asset.AssetType.STOCK,
+    )
+    pandas_data = {}
+    pandas_data[asset] = Data(
+        asset,
+        df,
+        timestep="minute",
+    )
+    backtesting_start = pandas_data[asset].datetime_start
+    backtesting_end = pandas_data[asset].datetime_end
+
+    return pandas_data, backtesting_start, backtesting_end
